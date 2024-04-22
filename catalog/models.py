@@ -23,9 +23,13 @@ class Product(models.Model):
     description = models.TextField(verbose_name='описание')
     photo = models.ImageField(upload_to='catalog/', **NULLABLE, verbose_name='фото')
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    price_of_product = models.IntegerField(verbose_name='цена за товар')
-    created_at = models.DateTimeField(default=datetime.now(), verbose_name='дата создания')
-    updated_at = models.DateTimeField(default=datetime.now(), verbose_name='дата последнего изменения')
+    price_of_product = models.PositiveIntegerField(verbose_name='цена за товар')
+    created_at = models.DateField(auto_now_add=True, verbose_name='Дата создания', **NULLABLE)
+    updated_at = models.DateField(auto_now=True, verbose_name='Дата изменения', **NULLABLE)
+
+    class Meta:
+        verbose_name = 'продукт'
+        verbose_name_plural = 'продукты'
 
 
     def __str__(self):
@@ -33,6 +37,3 @@ class Product(models.Model):
                 f'{self.description} {self.price_of_product} Руб.'
                 f'{self.created_at} {self.updated_at}')
 
-    class Meta:
-        verbose_name = 'продукт'
-        verbose_name_plural = 'продукты'
