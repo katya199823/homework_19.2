@@ -2,6 +2,10 @@
 {% load filter %}
 {% load media %}
 {% block content %}
+<div class="btn-group">
+    <a href="{% url 'catalog:game_create' %}"
+       class="btn btn-sm btn-outline-secondary">Добавить новую игру</a>
+</div>
 <div class="album py-5 bg-body-tertiary">
     <div class="container">
         <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
@@ -15,8 +19,14 @@
                         <p class="card-text">{{ object.description | slice }}</p>
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group">
-                                <a href="{% url 'catalog:game_detail' object.pk %}" class="btn btn-sm btn-outline-secondary">More</a>
+                                <a href="{% url 'catalog:game_detail' object.pk %}"
+                                   class="btn btn-sm btn-outline-secondary">Подробнее</a>
+                                <a href="{% url 'catalog:game_update' object.pk %}"
+                                   class="btn btn-sm btn-outline-secondary">Изменить</a>
+                                <a href="{% url 'catalog:game_delete' object.pk %}"
+                                   class="btn btn-sm btn-outline-secondary">Удалить</a>
                             </div>
+
                         </div>
                     </div>
                 </div>

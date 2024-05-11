@@ -37,3 +37,19 @@ class Product(models.Model):
                 f'{self.description} {self.price_of_product} Руб.'
                 f'{self.created_at} {self.updated_at}')
 
+
+class Blog(models.Model):
+    title = models.CharField(max_length=150, verbose_name='название статьи')
+    slug = models.CharField(max_length=150, **NULLABLE, verbose_name='URL')
+    description = models.TextField(verbose_name='описание')
+    photo = models.ImageField(upload_to='blog/', **NULLABLE, verbose_name='фото')
+    created_at = models.DateField(auto_now_add=True, verbose_name='дата создания')
+    sign_of_publication = models.BooleanField(default=True, verbose_name='опубликовано')
+    views_count = models.PositiveIntegerField(default=0, verbose_name='количество просмотров')
+
+    def str(self):
+        return f'{self.title} {self.description}'
+
+    class Meta:
+        verbose_name = 'статья'
+        verbose_name_plural = 'статьи'

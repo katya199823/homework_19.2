@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from catalog.models import Product, Category
+from catalog.models import Product, Category, Blog
 
 
 # Register your models here.
@@ -14,3 +14,11 @@ class AdminProduct(admin.ModelAdmin):
 @admin.register(Category)
 class AdminCategory(admin.ModelAdmin):
     list_display = ('id', 'name')
+
+
+@admin.register(Blog)
+class AdminBlog(admin.ModelAdmin):
+    list_display = ('id', 'title', 'created_at', 'sign_of_publication', 'views_count')
+    list_filter = ('sign_of_publication',)
+    search_fields = ('title', 'description')
+    prepopulated_fields = {'slug': ('title',)}
