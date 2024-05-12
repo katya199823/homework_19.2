@@ -1,13 +1,36 @@
-from django.shortcuts import render
+from django.db.models import Prefetch
+from django.forms import inlineformset_factory
 from django.urls import reverse_lazy, reverse
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from pytils.translit import slugify
 
-from catalog.models import Product, Category, Blog
+from catalog.forms import VersionProductForm, GameForm
+from catalog.models import Product, Category, Blog, Version
 
 
 class HomeListView(ListView):
     model = Product
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+
+        # prefetch_related для оптимизации запросов к базе данных,
+        # чтобы получить все связанные объекты VersionProduct для каждого Product
+        # При помощи Prefetch (предварительная выборка):
+        # versionproduct_set - формсет модели VersionProduct
+        # queryset - набор запросов (в данном случае устанавливаем фильтр, чтобы получать
+        # только активные версии)
+
+        products_with_versions = Product.objects.prefetch_related(
+            Prefetch(
+                "versionproduct_set",
+                queryset=Version.objects.filter(is_active=True),
+            )
+        ).all()
+
+        # Добавляем эту отфильтрованную информацию в контекст
+        context_data["products_with_versions"] = products_with_versions
+        return context_data
 
 
 class ContactDetailView(DetailView):
@@ -20,15 +43,40 @@ class GameDetailView(DetailView):
 
 class GameCreateView(CreateView):
     model = Product
-    fields = ('product_name', 'description', 'photo', 'price_of_product', 'category')
+    form_class = GameForm
     success_url = reverse_lazy('catalog:games_list')
 
 
 class GameUpdateView(UpdateView):
     model = Product
-    fields = ('product_name', 'description', 'photo', 'price_of_product')
+    form_class = GameForm
     success_url = reverse_lazy('catalog:games_list')
 
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        SubjectFormset = inlineformset_factory(
+            Product, Version, form=VersionProductForm, extra=1)
+        if self.request.method == "POST":
+            context_data["formset"] = SubjectFormset(self.request.POST, instance=self.object)
+        else:
+            context_data["formset"] = SubjectFormset(instance=self.object)
+        return context_data
+
+    def form_valid(self, form):
+        if form.is_valid():
+            new_blog = form.save()
+            new_blog.slug = slugify(new_blog.product_name)
+            new_blog.save()
+
+        return super().form_valid(form)
+
+    def form_valid_formset(self, form):
+        formset = self.get_context_data()["formset"]
+        self.object = form.save()
+        if formset.is_valid():
+            formset.instance = self.object
+            formset.save()
+        return super().form_valid(form)
 
 
 class GameDeleteView(DeleteView):

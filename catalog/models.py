@@ -9,6 +9,7 @@ class Category(models.Model):
     name = models.CharField(max_length=150, verbose_name='наименование категории')
     description = models.TextField(**NULLABLE,verbose_name='описание')
     photo = models.ImageField(upload_to='catalog/', **NULLABLE, verbose_name='фото')
+    slug = models.CharField(max_length=150, **NULLABLE, verbose_name='URL')
 
     def __str__(self):
         return f'{self.name} {self.description}'
@@ -26,6 +27,7 @@ class Product(models.Model):
     price_of_product = models.PositiveIntegerField(verbose_name='цена за товар')
     created_at = models.DateField(auto_now_add=True, verbose_name='Дата создания')
     updated_at = models.DateField(auto_now=True, verbose_name='Дата изменения')
+    slug = models.CharField(max_length=150, **NULLABLE, verbose_name='URL')
 
     class Meta:
         verbose_name = 'продукт'
@@ -53,3 +55,17 @@ class Blog(models.Model):
     class Meta:
         verbose_name = 'статья'
         verbose_name_plural = 'статьи'
+
+
+class Version(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, **NULLABLE, verbose_name='продукт')
+    version = models.PositiveIntegerField(verbose_name='версия')
+    title = models.CharField(max_length=150, verbose_name='название версии')
+    is_active = models.BooleanField(default=True, verbose_name='признак активной версии')
+
+    def str(self):
+        return f'{self.product}.'
+
+    class Meta:
+        verbose_name = 'версия продукта'
+        verbose_name_plural = 'версии продуктов'
